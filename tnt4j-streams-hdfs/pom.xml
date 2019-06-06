@@ -14,7 +14,7 @@
     <artifactId>tnt4j-streams-hdfs</artifactId>
 
     <properties>
-        <org.apache.hadoop.version>2.9.1</org.apache.hadoop.version>
+        <org.apache.hadoop.version>3.2.0</org.apache.hadoop.version>
     </properties>
 
     <build>
@@ -37,7 +37,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.1.2</version>
                 <configuration>
                     <archive>
                         <!--<index>true</index>-->
@@ -63,7 +63,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
