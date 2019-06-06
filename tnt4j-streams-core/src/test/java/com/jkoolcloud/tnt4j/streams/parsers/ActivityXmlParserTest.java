@@ -148,7 +148,7 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 		parser.setProperties(EMPTY_PROPS_MAP.entrySet());
 		ActivityField field = new ActivityField(STACKER_PARSER_FIELD);
 		ActivityFieldLocator stLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "/root",
-				ActivityFieldDataType.String);
+				ActivityFieldDataType.AsInput);
 		field.addLocator(stLocator);
 		field.setTransparent(true);
 		parser.addField(field);
