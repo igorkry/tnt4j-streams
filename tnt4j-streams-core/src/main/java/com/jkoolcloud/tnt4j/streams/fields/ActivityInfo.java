@@ -479,7 +479,7 @@ public class ActivityInfo {
 	private static String[] getStringsValue(Object value, ActivityField field) {
 		String[] strings = Utils.getTags(value);
 
-		if (ArrayUtils.getLength(strings) > 1 && field.isArrayFormattable()) {
+		if (field.isArrayFormattable(strings)) {
 			strings = new String[] { formatValuesArray(strings, field) };
 		}
 

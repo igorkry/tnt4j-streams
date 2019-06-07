@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -396,13 +397,19 @@ public class ActivityField extends AbstractFieldEntity {
 	}
 
 	/**
-	 * Checks whether field has array formatting attributes {@code separator} or {@code formattingPattern} defined.
+	 * Checks whether provided {@code strings} array shall be formatted by this filed using attributes {@code separator}
+	 * or {@code formattingPattern} defined defined values.
+	 * 
+	 * @param strings
+	 *            string array to be formatted
 	 *
-	 * @return {@code true} if field has {@code separator} or {#code formattingPattern} defined, {@code false} -
-	 *         otherwise
+	 * @return {@code true} if field has {@code formattingPattern} defined or {@code separator} is not {@code null} and
+	 *         {@code strings} array length is greater than 1, {@code false} - otherwise
 	 */
-	public boolean isArrayFormattable() {
-		return separator != null || StringUtils.isNotEmpty(formattingPattern);
+	public boolean isArrayFormattable(String[] strings) {
+		int sLength = ArrayUtils.getLength(strings);
+
+		return (StringUtils.isNotEmpty(formattingPattern) && sLength > 0) || (separator != null && sLength > 1);
 	}
 
 	/**
@@ -933,8 +940,7 @@ public class ActivityField extends AbstractFieldEntity {
 		if (isEnumeration()) {
 			if (value instanceof String) {
 				String strValue = (String) value;
-				value = StringUtils.containsOnly(strValue, "0123456789") ? Integer.valueOf(strValue) // NON-NLS
-						: strValue.toUpperCase().trim();
+				value = StringUtils.isNumeric(strValue) ? Integer.valueOf(strValue) : strValue.toUpperCase().trim();
 			}
 		}
 		StreamFieldType fieldType = getFieldType();
