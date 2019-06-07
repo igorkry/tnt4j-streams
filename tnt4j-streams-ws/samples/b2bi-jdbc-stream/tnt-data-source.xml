@@ -88,8 +88,8 @@
             <field-locator id="AFileKey" locator="EVENT_ARRIVED_FILE_KEY" locator-type="Label"/>
         </field>
         <field name="EventName" locator="EVENT_ENTITY_TYPE" locator-type="Label"/>
-        <field name="StartTime" locator="EVENT_TIME" locator-type="Label" datatype="Number" units="Milliseconds" timezone="GMT-04:00"/>
-        <field name="EndTime" locator="EVENT_MODIFYTS" locator-type="Label"/>
+        <field name="StartTime" locator="AF_CREATE_TS" locator-type="Label"/>
+        <field name="EndTime" locator="EVENT_TIME" locator-type="Label" datatype="Number" units="Milliseconds" timezone="GMT-04:00"/>
 
         <field name="EntityKey" locator="EVENT_ENTITY_KEY" locator-type="Label"/>
         <field name="DataFlowId" locator="EVENT_DATA_FLOW_ID" locator-type="Label"/>
@@ -108,7 +108,7 @@
         </field>
         <field name="EventType" value="">    <!-- TODO: maybe add more types over mapping like START, UPDATE etc -->
             <field-transform lang="groovy" name="DiffTransform"><![CDATA[
-                ${EventCode} == "FG_0425" // using 0503 just to have template name, 0425 is when file actually arrives to FG
+                ${EventCode} == "FG_0425"
                    ? "RECEIVE"
                    : ${EventCode} == "FG_0701"
                        ? "SEND"
@@ -463,6 +463,8 @@
                           , FE.ENTITY_TYPE AS EVENT_ENTITY_TYPE
                           , FE.DATA_FLOW_ID AS EVENT_DATA_FLOW_ID
                           , FE.TIME AS EVENT_TIME
+                          , FAF.CREATETS AS AF_CREATE_TS
+                          , FAF.MODIFYTS AS AF_MODIFY_TS
                           , FE.COUNTER AS EVENT_COUNTER
                           , FE.EVENT_CODE AS EVENT_EVENT_CODE
                           , FE.LOCKID AS EVENT_LOCKID
@@ -493,6 +495,7 @@
                              WHERE FE.EVENT_KEY = EAT.EVENT_KEY
                             )
                         FROM FG_EVENT FE
+                            LEFT OUTER JOIN FG_ARRIVEDFILE FAF ON (FAF.ARRIVEDFILE_KEY = FE.ARRIVEDFILE_KEY)
                         WHERE FE.MODIFYTS > ?
                         ORDER BY FE.CREATETS, FE.COUNTER ASC
                     ]]>
