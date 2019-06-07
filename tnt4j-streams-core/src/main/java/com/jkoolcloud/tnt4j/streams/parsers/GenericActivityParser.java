@@ -344,8 +344,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		Map<String, ActivityField> parserFieldsMap = new LinkedHashMap<>(fields.size());
 		Map<String, ActivityField> allFieldsMap = new LinkedHashMap<>(fields.size());
 		for (ActivityField f : fields) {
-			parserFieldsMap.put(f.getFieldTypeName(), f);
-			allFieldsMap.put(f.getFieldTypeName(), f);
+			String key = fieldKey(f);
+			parserFieldsMap.put(key, f);
+			allFieldsMap.put(key, f);
+
 			collectStackedParsersFields(allFieldsMap, f, this);
 		}
 
@@ -368,7 +370,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 			if (CollectionUtils.isNotEmpty(refs)) {
 				for (String ref : refs) {
-					ActivityField rf = parserFieldsMap.get(ref);
+					ActivityField rf = getFieldByRef(parserFieldsMap, ref);
 
 					if (rf == null) {
 						if (isExtRefField(ref, aaFields, allFieldsMap) || hasDynamicFields) {
@@ -416,7 +418,17 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		return StreamsConstants.isParentEntityRef(ref) //
 				|| isContextValueRef(ref) //
 				|| aaFields.contains(ref) //
-				|| allFieldsMap.containsKey(ref);
+				|| getFieldByRef(allFieldsMap, ref) != null;
+	}
+
+	private static ActivityField getFieldByRef(Map<String, ActivityField> map, String ref) {
+		for (Map.Entry<String, ActivityField> fme : map.entrySet()) {
+			if (ref.equals(fme.getValue().getFieldTypeName())) {
+				return fme.getValue();
+			}
+		}
+
+		return null;
 	}
 
 	private static boolean isContextValueRef(String ref) {
@@ -460,9 +472,11 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			}
 
 			for (ActivityField spf : sParser.fieldList) {
-				ActivityField pmf = fieldsMap.put(spf.getFieldTypeName(), spf);
+				ActivityField pmf = getFieldByRef(fieldsMap, spf.getFieldTypeName());
 
-				if (pmf != null) {
+				fieldsMap.put(fieldKey(spf), spf);
+
+				if (pmf != null && spRef.getAggregationType() == AggregationType.Merge) {
 					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.stacked.field.conflict", f.getParser().getName(), f,
 							spf.getParser().getName(), spf, pmf.getParser().getName(), pmf);
@@ -471,6 +485,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				collectStackedParsersFields(fieldsMap, spf, sParser);
 			}
 		}
+	}
+
+	private static String fieldKey(ActivityField f) {
+		return f.getFieldTypeName() + "#" + f.hashCode(); // NON-NLS
 	}
 
 	/**

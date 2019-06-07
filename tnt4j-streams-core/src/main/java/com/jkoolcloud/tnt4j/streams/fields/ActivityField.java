@@ -476,38 +476,6 @@ public class ActivityField extends AbstractFieldEntity {
 	}
 
 	/**
-	 * Indicates whether some other object is "equal to" this field.
-	 *
-	 * @param obj
-	 *            the reference object with which to compare.
-	 *
-	 * @return {@code true} if this field is the same as the obj argument, {@code false} otherwise
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null || getClass() != obj.getClass()) {
-			return false;
-		}
-
-		ActivityField that = (ActivityField) obj;
-
-		return fieldTypeName.equals(that.fieldTypeName);
-	}
-
-	/**
-	 * Returns hash code for this field object.
-	 *
-	 * @return a hash code value for this field.
-	 */
-	@Override
-	public int hashCode() {
-		return fieldTypeName.hashCode();
-	}
-
-	/**
 	 * Returns string representing activity field by field type.
 	 *
 	 * @return a string representing field.
