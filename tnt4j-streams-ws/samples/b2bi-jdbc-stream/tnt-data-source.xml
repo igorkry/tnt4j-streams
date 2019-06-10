@@ -268,7 +268,7 @@
         </field>
 
         <!-- Store latest value to cache -->
-        <field name="E_App_ModifyTs" locator="EVENT_MODIFYTS" locator-type="Label" transparent="true"/>
+        <field name="E_App_ModifyTs" locator="REF_EVENT_MODIFYTS" locator-type="Label" transparent="true"/>
 
         <!-- Filter out events having: -->
         <!--        * no DATA_FLOW_ID or equal to 0 -->
@@ -656,13 +656,14 @@
                              FROM FG_EVENTATTR EAT
                              WHERE FE.EVENT_KEY = EAT.EVENT_KEY
                             )
+                          , FER.MODIFYTS REF_EVENT_MODIFYTS
                           , FEA.VALUE AS APPL_NAME
                         FROM FG_EVENT FE
                             LEFT OUTER JOIN FG_EVENT FER ON (FER.EVENT_CODE = 'FG_0503' AND FER.ARRIVEDFILE_KEY = FE.ARRIVEDFILE_KEY)
                             LEFT OUTER JOIN FG_EVENTATTR FEA on (FER.EVENT_KEY = FEA.EVENT_KEY AND FEA.NAME = 'RoutingChannelTemplateName')
                             LEFT OUTER JOIN FG_ARRIVEDFILE FAF ON (FAF.ARRIVEDFILE_KEY = FE.ARRIVEDFILE_KEY)
                         WHERE FE.EVENT_CODE = 'FG_0425'
-                          AND FE.MODIFYTS > ?
+                          AND FER.MODIFYTS > ?
                         ORDER BY FE.CREATETS, FE.COUNTER ASC
                     ]]>
                     <!-- parameter index is incremented automatically -->
