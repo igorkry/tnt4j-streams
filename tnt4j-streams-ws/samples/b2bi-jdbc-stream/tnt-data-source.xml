@@ -179,6 +179,107 @@
         </filter>
     </parser>
 
+    <parser name="B2BiFGEventsApplResultSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJDBCResultSetParser">
+        <field name="Guid" formattingPattern="FGEvent_{0}">
+            <field-locator id="EventKey" locator="EVENT_EVENT_KEY" locator-type="Label"/>
+        </field>
+        <field name="Correlator" formattingPattern="AFile_{0}">
+            <field-locator id="AFileKey" locator="EVENT_ARRIVED_FILE_KEY" locator-type="Label"/>
+        </field>
+        <field name="EventName" locator="EVENT_ENTITY_TYPE" locator-type="Label"/>
+        <field name="StartTime" locator="AF_CREATE_TS" locator-type="Label"/>
+        <field name="EndTime" locator="EVENT_TIME" locator-type="Label" datatype="Number" units="Milliseconds" timezone="GMT-04:00"/>
+
+        <field name="EntityKey" locator="EVENT_ENTITY_KEY" locator-type="Label"/>
+        <field name="DataFlowId" locator="EVENT_DATA_FLOW_ID" locator-type="Label"/>
+        <field name="Counter" locator="EVENT_COUNTER" locator-type="Label" datatype="Number" format="long"/>
+        <field name="EventCode" locator="EVENT_EVENT_CODE" locator-type="Label"/>
+        <field name="LockId" locator="EVENT_LOCKID" locator-type="Label" datatype="Number" format="integer"/>
+        <field name="CreateTs" locator="EVENT_CREATETS" locator-type="Label"/>
+        <field name="ModifyTs" locator="EVENT_MODIFYTS" locator-type="Label"/>
+        <field name="CreateUserId" locator="EVENT_CREATEUSERID" locator-type="Label"/>
+        <field name="ModifyUserId" locator="EVENT_MODIFYUSERID" locator-type="Label"/>
+        <field name="CreateProgId" locator="EVENT_CREATEPROGID" locator-type="Label"/>
+        <field name="ModifyProgId" locator="EVENT_MODIFYPROGID" locator-type="Label"/>
+
+        <field name="EventCodeDescr" locator="EventCode" locator-type="Activity">
+            <field-map-ref resource="EVENT_CODE_MAPPINGS.EventCode"/>
+        </field>
+        <field name="EventType" value="">    <!-- TODO: maybe add more types over mapping like START, UPDATE etc -->
+            <field-transform lang="groovy" name="DiffTransform"><![CDATA[
+                ${EventCode} == "FG_0425"
+                   ? "RECEIVE"
+                   : ${EventCode} == "FG_0701"
+                       ? "SEND"
+                       : "EVENT"
+            ]]></field-transform>
+        </field>
+
+        <!-- FG_EVENTATTR table columns from XML -->
+        <embedded-activity name="FG_Event_Attrs" locator="EVT_ATTRS" locator-type="Label">
+            <parser-ref name="B2BiFGEventAttributesXMLParser" aggregation="Merge"/>
+        </embedded-activity>
+        <field name="TrackingId" separator="_">
+            <field-locator id="DataFlowId" locator="DataFlowId" locator-type="Activity"/>
+            <field-locator locator="FG_E_Attr_ProducerFilename" locator-type="Activity" required="false"/>
+            <field-locator locator="FG_E_Attr_ConsumerFilename" locator-type="Activity" required="false"/>
+        </field>
+        <field name="Owner" value="">
+            <field-transform lang="groovy" name="DiffTransform"><![CDATA[
+                ${EventName} == "ARRIVED_FILE"
+                   ? "Consumer"
+                   : ${EventName} == "DELIVERY"
+                       ? "Producer"
+                       : "GW"
+            ]]></field-transform>
+        </field>
+        <field name="ApplLookUp" locator="APPL_NAME" locator-type="Label"/>
+        <field name="CacheApplLookUp" locator="CachedApplName" locator-type="Cache" transparent="true"/>
+        <field name="ApplName" separator=":">
+            <field-locator locator="ApplLookUp" locator-type="Activity" required="false">
+                <field-transform lang="groovy" name="AppLookUpTransform" phase="raw"><![CDATA[
+                    StringUtils.isEmpty($fieldValue) ? ${CacheApplLookUp} : $fieldValue
+                ]]></field-transform>
+            </field-locator>
+            <field-locator locator="Owner" locator-type="Activity" required="false"/>
+        </field>
+        <field name="ResourceNameTemp" separator="/" transparent="true" datatype="String">
+            <field-locator id="ProducerMailboxPath" locator="FG_E_Attr_ProducerMailboxPath" locator-type="Activity" required="false"/>
+            <field-locator id="ProducerFilename" locator="FG_E_Attr_ProducerFilename" locator-type="Activity" required="false"/>
+            <field-locator id="ConsumerMailboxPath" locator="FG_E_Attr_ConsumerMailboxPath" locator-type="Activity" required="false"/>
+            <field-locator id="ConsumerFilename" locator="FG_E_Attr_ConsumerFilename" locator-type="Activity" required="false"/>
+        </field>
+        <field name="ResourceName" locator="ResourceNameTemp" locator-type="Activity" formattingPattern="FILE={0}"/>
+        <field name="Correlator" separator=".">
+            <!-- XML stream configuration (minimized)-->
+            <field-locator id="ProducerDocumentId" locator="FG_E_Attr_ProducerDocumentId" locator-type="Activity" required="false"/>
+            <field-locator id="ConsumerFilename" locator="FG_E_Attr_ConsumerFilename" locator-type="Activity" required="false"/>
+            <field-locator id="ProducerPayload" locator="FG_E_Attr_ProducerPayload" locator-type="Activity" required="false"/>
+            <field-locator id="ProducerPayloadDocumentId" locator="FG_E_Attr_ProducerPayloadDocumentId" locator-type="Activity"/>
+            <field-locator id="ConsumerDocumentId" locator="FG_E_Attr_ConsumerDocumentId" locator-type="Activity"/>
+            <field-locator id="DataFlowId" locator="DataFlowId" locator-type="Activity"/>
+        </field>
+
+        <field name="Correlator" formattingPattern="FGEvent_{0}">
+            <field-locator id="EventKey" locator="EVENT_EVENT_KEY" locator-type="Label"/>
+        </field>
+        <field name="Correlator" formattingPattern="Workflow_Context_{0}">
+            <field-locator id="EventKey" locator="FG_E_Attr_WorkflowId" locator-type="Activity"/>
+        </field>
+
+        <!-- Store latest value to cache -->
+        <field name="E_App_ModifyTs" locator="EVENT_MODIFYTS" locator-type="Label" transparent="true"/>
+
+        <!-- Filter out events having: -->
+        <!--        * no DATA_FLOW_ID or equal to 0 -->
+        <!--        * APPL_NAME undefined -->
+        <filter name="EventDFFilter">
+            <expression handle="exclude" lang="groovy"><![CDATA[
+               ${DataFlowId} == null || ${DataFlowId} == 0 || ${ApplLookUp} == null
+            ]]></expression>
+        </filter>
+    </parser>
+
     <parser name="B2BiRoutesResultSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJDBCResultSetParser">
         <field name="Guid" formattingPattern="Route_{0}">
             <field-locator id="RouteKey" locator="ROUTE_KEY" locator-type="Label"/>
@@ -196,7 +297,11 @@
             <field-locator id="State" locator="ROUTE_STATE" locator-type="Label"/>
         </field>
         <field name="StartTime" locator="ROUTE_START_TIME" locator-type="Label"/>
-        <field name="EndTime" locator="ROUTE_COMPLETE_TIME" locator-type="Label"/>
+        <field name="EndTime" locator="ROUTE_COMPLETE_TIME" locator-type="Label">
+            <field-transform name="RouteEndTimeTransform" lang="groovy" phase="formatted">
+                $fieldValue == null ? ${StartTime} : $fieldValue
+            </field-transform>
+        </field>
 
         <field name="DataFlowId" locator="ROUTE_DATA_FLOW_ID" locator-type="Label"/>
         <field name="RoutchanKey" locator="ROUTE_ROUTCHAN_KEY" locator-type="Label"/>
@@ -378,6 +483,11 @@
             <value>${E_ModifyTs}</value>
             <default>1970-01-01 00:00:00.000</default>
         </entry>
+        <entry id="LastEventApplRecordMDate">
+            <key>LastEventApplRecordMDate</key>
+            <value>${E_App_ModifyTs}</value>
+            <default>1970-01-01 00:00:00.000</default>
+        </entry>
         <entry id="LastRouteRecordMDate">
             <key>LastRouteRecordMDate</key>
             <value>${R_ModifyTs}</value>
@@ -505,8 +615,64 @@
                     <parser-ref name="B2BiFGEventsResultSetParser"/>
                 </request>
             </step>
-            <step name="B2Bi routes query">
+            <step name="B2Bi application name query">
                 <schedule-simple interval="60" units="Seconds" repeatCount="-1" startDelay="20" startDelayUnits="Seconds"/>
+                <request>
+                    <![CDATA[
+                        SELECT FE.EVENT_KEY AS EVENT_EVENT_KEY
+                          , FE.ENTITY_KEY AS EVENT_ENTITY_KEY
+                          , RTRIM(FE.ARRIVEDFILE_KEY) AS EVENT_ARRIVED_FILE_KEY
+                          , FE.ENTITY_TYPE AS EVENT_ENTITY_TYPE
+                          , FE.DATA_FLOW_ID AS EVENT_DATA_FLOW_ID
+                          , FE.TIME AS EVENT_TIME
+                          , FAF.CREATETS AS AF_CREATE_TS
+                          , FAF.MODIFYTS AS AF_MODIFY_TS
+                          , FE.COUNTER AS EVENT_COUNTER
+                          , FE.EVENT_CODE AS EVENT_EVENT_CODE
+                          , FE.LOCKID AS EVENT_LOCKID
+                          , FE.CREATETS AS EVENT_CREATETS
+                          , FE.MODIFYTS AS EVENT_MODIFYTS
+                          , FE.CREATEUSERID AS EVENT_CREATEUSERID
+                          , FE.MODIFYUSERID AS EVENT_MODIFYUSERID
+                          , FE.CREATEPROGID AS EVENT_CREATEPROGID
+                          , FE.MODIFYPROGID AS EVENT_MODIFYPROGID
+                          , (SELECT xmlserialize(
+                                      content xmlelement(
+                                        name "attributes",
+                                        xmlagg(
+                                          xmlelement(
+                                            name "attr",
+                                            xmlforest(
+                                              EAT.ORDINAL as "EVENTATTR_ORDIINAL"
+                                              , EAT.NAME as "EVENTATTR_NAME"
+                                              , EAT.VALUE as "EVENTATTR_VALUE"
+                                              -- , EAT.CREATETS as "EVENTATTR_CREATETS"
+                                              -- , EAT.MODIFYTS as "EVENTATTR_MODIFYTS"
+                                            )
+                                          )
+                                        )
+                                      ) AS CLOB VERSION '1.0' INCLUDING XMLDECLARATION
+                                    ) AS EVT_ATTRS
+                             FROM FG_EVENTATTR EAT
+                             WHERE FE.EVENT_KEY = EAT.EVENT_KEY
+                            )
+                          , FEA.VALUE AS APPL_NAME
+                        FROM FG_EVENT FE
+                            LEFT OUTER JOIN FG_EVENT FER ON (FER.EVENT_CODE = 'FG_0503' AND FER.ARRIVEDFILE_KEY = FE.ARRIVEDFILE_KEY)
+                            LEFT OUTER JOIN FG_EVENTATTR FEA on (FER.EVENT_KEY = FEA.EVENT_KEY AND FEA.NAME = 'RoutingChannelTemplateName')
+                            LEFT OUTER JOIN FG_ARRIVEDFILE FAF ON (FAF.ARRIVEDFILE_KEY = FE.ARRIVEDFILE_KEY)
+                        WHERE FE.EVENT_CODE = 'FG_0425'
+                          AND FE.MODIFYTS > ?
+                        ORDER BY FE.CREATETS, FE.COUNTER ASC
+                    ]]>
+                    <!-- parameter index is incremented automatically -->
+                    <req-param value="${LastEventApplRecordMDate}" type="TIMESTAMP"/>
+
+                    <parser-ref name="B2BiFGEventsApplResultSetParser"/>
+                </request>
+            </step>
+            <step name="B2Bi routes query">
+                <schedule-simple interval="60" units="Seconds" repeatCount="-1" startDelay="30" startDelayUnits="Seconds"/>
                 <request>
                     <![CDATA[
                         SELECT RTRIM(FR.ROUTE_KEY) AS ROUTE_KEY
@@ -538,7 +704,7 @@
                 </request>
             </step>
             <step name="B2Bi deliveries query">
-                <schedule-simple interval="60" units="Seconds" repeatCount="-1" startDelay="30" startDelayUnits="Seconds"/>
+                <schedule-simple interval="60" units="Seconds" repeatCount="-1" startDelay="40" startDelayUnits="Seconds"/>
                 <request>
                     <![CDATA[
                         SELECT RTRIM(FD.DELIVERY_KEY) AS DELIVERY_KEY
@@ -573,7 +739,7 @@
                 </request>
             </step>
             <step name="B2Bi correlation sets query">
-                <schedule-simple interval="60" units="Seconds" repeatCount="-1" startDelay="35" startDelayUnits="Seconds"/>
+                <schedule-simple interval="60" units="Seconds" repeatCount="-1" startDelay="45" startDelayUnits="Seconds"/>
                 <request>
                     <![CDATA[
                         SELECT CS.CORRELATION_ID AS CORRELATION_ID
@@ -598,7 +764,7 @@
                 </request>
             </step>
             <step name="B2Bi workflow context query">
-                <schedule-simple interval="60" units="Seconds" repeatCount="-1" startDelay="35" startDelayUnits="Seconds"/>
+                <schedule-simple interval="60" units="Seconds" repeatCount="-1" startDelay="45" startDelayUnits="Seconds"/>
                 <request>
                     <![CDATA[
                         SELECT WC.WFC_ID AS WORKFLOW_WFC_ID
