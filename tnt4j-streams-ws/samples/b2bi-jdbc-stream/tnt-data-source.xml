@@ -24,6 +24,12 @@
             <field-locator id="FileName" locator="AFILE_FILE_NAME" locator-type="Label" required="false"/>
         </field>
         <field name="ApplName" locator="AFILE_CREATEPROGID" locator-type="Label"/>
+        <!--field name="ApplName" locator="AFILE_CREATEPROGID" locator-type="Label">
+            <field-transform lang="groovy" name="AttrNameTransform"><![CDATA[
+                Strings.replace($fieldValue, "filegateway", "");
+            ]]></field-transform>
+        </field-->
+
         <field name="ResourceNameTemp" separator="/" transparent="true" datatype="String">
             <field-locator id="MailboxPath" locator="AFILE_MAILBOX_PATH" locator-type="Label" required="false"/>
             <field-locator id="Filename" locator="AFILE_FILE_NAME" locator-type="Label" required="false"/>
@@ -49,7 +55,6 @@
         <field name="FileSize" locator="AFILE_FILE_SIZE" locator-type="Label" datatype="Number" format="long"/>
         <field name="MailboxPath" locator="AFILE_MAILBOX_PATH" locator-type="Label"/>
         <field name="DataFlowId" locator="AFILE_DATA_FLOW_ID" locator-type="Label"/>
-        <field name="ProdOrgKey" locator="AFILE_PROD_ORG_KEY" locator-type="Label"/>
         <field name="ProdOrgName" locator="AFILE_PROD_ORG_NAME" locator-type="Label"/>
         <field name="State" locator="AFILE_STATE" locator-type="Label"/>
         <field name="DocumentId" locator="AFILE_DOCUMENT_ID" locator-type="Label"/>
@@ -153,6 +158,7 @@
         <field name="ResourceName" locator="ResourceNameTemp" locator-type="Activity" formattingPattern="FILE={0}"/>
         <field name="Correlator" separator=".">
             <!-- XML stream configuration (minimized)-->
+            <field-locator id="AsyncXrefId" locator="FG_E_Attr_AsyncTransferId" locator-type="Activity" required="false"/>
             <field-locator id="ProducerDocumentId" locator="FG_E_Attr_ProducerDocumentId" locator-type="Activity" required="false"/>
             <field-locator id="ConsumerFilename" locator="FG_E_Attr_ConsumerFilename" locator-type="Activity" required="false"/>
             <field-locator id="ProducerPayload" locator="FG_E_Attr_ProducerPayload" locator-type="Activity" required="false"/>
@@ -252,6 +258,7 @@
         <field name="ResourceName" locator="ResourceNameTemp" locator-type="Activity" formattingPattern="FILE={0}"/>
         <field name="Correlator" separator=".">
             <!-- XML stream configuration (minimized)-->
+            <field-locator id="AsyncXrefId" locator="FG_E_Attr_AsyncTransferId" locator-type="Activity" required="false"/>
             <field-locator id="ProducerDocumentId" locator="FG_E_Attr_ProducerDocumentId" locator-type="Activity" required="false"/>
             <field-locator id="ConsumerFilename" locator="FG_E_Attr_ConsumerFilename" locator-type="Activity" required="false"/>
             <field-locator id="ProducerPayload" locator="FG_E_Attr_ProducerPayload" locator-type="Activity" required="false"/>
