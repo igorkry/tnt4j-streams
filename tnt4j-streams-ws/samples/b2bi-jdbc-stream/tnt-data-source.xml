@@ -55,6 +55,7 @@
         <field name="FileSize" locator="AFILE_FILE_SIZE" locator-type="Label" datatype="Number" format="long"/>
         <field name="MailboxPath" locator="AFILE_MAILBOX_PATH" locator-type="Label"/>
         <field name="DataFlowId" locator="AFILE_DATA_FLOW_ID" locator-type="Label"/>
+        <!--field name="ProdOrgKey" locator="AFILE_PROD_ORG_KEY" locator-type="Label"/-->
         <field name="ProdOrgName" locator="AFILE_PROD_ORG_NAME" locator-type="Label"/>
         <field name="State" locator="AFILE_STATE" locator-type="Label"/>
         <field name="DocumentId" locator="AFILE_DOCUMENT_ID" locator-type="Label"/>
@@ -329,11 +330,11 @@
         <field name="R_ModifyTs" locator="ROUTE_MODIFYTS" locator-type="Label" transparent="true"/>
 
         <!-- Filter out routes having no channel key defined -->
-        <filter name="EventDFFilter">
+        <!--filter name="EventDFFilter">
             <expression handle="exclude" lang="groovy"><![CDATA[
                ${RoutchanKey} == null
             ]]></expression>
-        </filter>
+        </filter-->
     </parser>
 
     <parser name="B2BiDeliveriesResultSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJDBCResultSetParser">
@@ -377,11 +378,11 @@
         <field name="D_ModifyTs" locator="DELIVERY_MODIFYTS" locator-type="Label" transparent="true"/>
 
         <!-- Filter out deliveries having no filename defined -->
-        <filter name="EventDFFilter">
+        <!--filter name="EventDFFilter">
             <expression handle="exclude" lang="groovy"><![CDATA[
                ${FileName} == null
             ]]></expression>
-        </filter>
+        </filter-->
     </parser>
 
     <parser name="B2BiCorrelationSetResultSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJDBCResultSetParser">
@@ -703,6 +704,7 @@
                           , FR.MODIFYPROGID AS ROUTE_MODIFYPROGID
                         FROM FG_ROUTE FR
                         WHERE FR.MODIFYTS > ?
+                          AND FR.ROUTCHAN_KEY IS NOT NULL  -- exclude all routes having no channel key defined
                         ORDER BY FR.CREATETS, FR.DATA_FLOW_ID ASC
                     ]]>
                     <!-- parameter index is incremented automatically -->
@@ -738,6 +740,7 @@
                           , FD.DIST_CONSUMER_MSGID AS DELIVERY_DIST_CONSUMER_MSGID
                         FROM FG_DELIVERY FD
                         WHERE FD.MODIFYTS > ?
+                          AND FD.FILENAME IS NOT NULL  -- exclude all deliveries not bound to particular file transfer
                         ORDER BY FD.CREATETS, FD.DATA_FLOW_ID ASC
                     ]]>
                     <!-- parameter index is incremented automatically -->
@@ -810,6 +813,8 @@
                           , WC.EVENT_LEVEL AS WORKFLOW_EVENT_LEVEL
                         FROM WORKFLOW_CONTEXT WC
                         WHERE WC.START_TIME > ?
+                          AND EXISTS (SELECT DL.WORKFLOW_ID FROM DOCUMENT_LIFESPAN DL WHERE DL.WORKFLOW_ID = WC.WORKFLOW_ID)  -- pick only document related workflow events
+                          --AND EXISTS (SELECT AX.SESSION_ID FROM ACT_SESSION AX WHERE AX.START_WFID = WC.WORKFLOW_ID or AX.END_WFID = WC.WORKFLOW_ID) -- optional case of above, picking session bound workflows
                         ORDER BY WC.START_TIME, WC.WORKFLOW_ID ASC
                     ]]>
                     <!-- parameter index is incremented automatically -->
