@@ -128,8 +128,8 @@
         </embedded-activity>
         <field name="TrackingId" separator="_">
             <field-locator id="DataFlowId" locator="DataFlowId" locator-type="Activity"/>
-            <field-locator locator="FG_E_Attr_ProducerFilename" locator-type="Activity" required="false"/>
-            <field-locator locator="FG_E_Attr_ConsumerFilename" locator-type="Activity" required="false"/>
+            <field-locator id="ProducerFilename" locator="FG_E_Attr_ProducerFilename" locator-type="Activity" required="false"/>
+            <field-locator id="ConsumerFilename" locator="FG_E_Attr_ConsumerFilename" locator-type="Activity" required="false"/>
         </field>
         <field name="Owner" value="">
             <field-transform lang="groovy" name="DiffTransform"><![CDATA[
@@ -143,12 +143,12 @@
         <field name="ApplLookUp" locator="FG_E_Attr_RoutingChannelTemplateName" locator-type="Activity"/>
         <field name="CacheApplLookUp" locator="CachedApplName" locator-type="Cache" transparent="true"/>
         <field name="ApplName" separator=":">
-            <field-locator locator="ApplLookUp" locator-type="Activity" required="false">
+            <field-locator id="AppLookUp" locator="ApplLookUp" locator-type="Activity" required="false">
                 <field-transform lang="groovy" name="AppLookUpTransform" phase="raw"><![CDATA[
                     StringUtils.isEmpty($fieldValue) ? ${CacheApplLookUp} : $fieldValue
                 ]]></field-transform>
             </field-locator>
-            <field-locator locator="Owner" locator-type="Activity" required="false"/>
+            <field-locator id="Owner" locator="Owner" locator-type="Activity" required="false"/>
         </field>
         <field name="ResourceNameTemp" separator="/" transparent="true" datatype="String">
             <field-locator id="ProducerMailboxPath" locator="FG_E_Attr_ProducerMailboxPath" locator-type="Activity" required="false"/>
@@ -172,7 +172,7 @@
             <field-locator id="EventKey" locator="EVENT_EVENT_KEY" locator-type="Label"/>
         </field>
         <field name="Correlator" formattingPattern="Workflow_Context_{0}">
-            <field-locator id="EventKey" locator="FG_E_Attr_WorkflowId" locator-type="Activity"/>
+            <field-locator id="WorkflowId" locator="FG_E_Attr_WorkflowId" locator-type="Activity"/>
         </field>
 
         <!-- Store latest value to cache -->
@@ -228,8 +228,8 @@
         </embedded-activity>
         <field name="TrackingId" separator="_">
             <field-locator id="DataFlowId" locator="DataFlowId" locator-type="Activity"/>
-            <field-locator locator="FG_E_Attr_ProducerFilename" locator-type="Activity" required="false"/>
-            <field-locator locator="FG_E_Attr_ConsumerFilename" locator-type="Activity" required="false"/>
+            <field-locator id="ProducerFilename" locator="FG_E_Attr_ProducerFilename" locator-type="Activity" required="false"/>
+            <field-locator id="ConsumerFilename" locator="FG_E_Attr_ConsumerFilename" locator-type="Activity" required="false"/>
         </field>
         <field name="Owner" value="">
             <field-transform lang="groovy" name="DiffTransform"><![CDATA[
@@ -243,12 +243,12 @@
         <field name="ApplLookUp" locator="APPL_NAME" locator-type="Label"/>
         <field name="CacheApplLookUp" locator="CachedApplName" locator-type="Cache" transparent="true"/>
         <field name="ApplName" separator=":">
-            <field-locator locator="ApplLookUp" locator-type="Activity" required="false">
+            <field-locator id="AppLookUp" locator="ApplLookUp" locator-type="Activity" required="false">
                 <field-transform lang="groovy" name="AppLookUpTransform" phase="raw"><![CDATA[
                     StringUtils.isEmpty($fieldValue) ? ${CacheApplLookUp} : $fieldValue
                 ]]></field-transform>
             </field-locator>
-            <field-locator locator="Owner" locator-type="Activity" required="false"/>
+            <field-locator id="Owner" locator="Owner" locator-type="Activity" required="false"/>
         </field>
         <field name="ResourceNameTemp" separator="/" transparent="true" datatype="String">
             <field-locator id="ProducerMailboxPath" locator="FG_E_Attr_ProducerMailboxPath" locator-type="Activity" required="false"/>
@@ -272,7 +272,7 @@
             <field-locator id="EventKey" locator="EVENT_EVENT_KEY" locator-type="Label"/>
         </field>
         <field name="Correlator" formattingPattern="Workflow_Context_{0}">
-            <field-locator id="EventKey" locator="FG_E_Attr_WorkflowId" locator-type="Activity"/>
+            <field-locator id="WorkflowId" locator="FG_E_Attr_WorkflowId" locator-type="Activity"/>
         </field>
 
         <!-- Store latest value to cache -->
@@ -297,11 +297,11 @@
             <field-locator id="AFileKey" locator="ROUTE_AFILE_KEY" locator-type="Label"/>
         </field>
         <field name="Correlator" formattingPattern="Route_{0}">
-            <field-locator id="ARouteKey" locator="ROUTE_KEY" locator-type="Label"/>
+            <field-locator id="RouteKey" locator="ROUTE_KEY" locator-type="Label"/>
         </field>
         <field name="EventName" separator=".">
             <field-locator id="DataFlowId" locator="ROUTE_DATA_FLOW_ID" locator-type="Label"/>
-            <field-locator id="ConsOrg" locator="ROUTE_CONS_ORG_KEY" locator-type="Label"/>
+            <field-locator id="ConsOrgKey" locator="ROUTE_CONS_ORG_KEY" locator-type="Label"/>
             <field-locator id="State" locator="ROUTE_STATE" locator-type="Label"/>
         </field>
         <field name="StartTime" locator="ROUTE_START_TIME" locator-type="Label"/>
@@ -346,7 +346,7 @@
             <field-locator id="DeliveryKey" locator="DELIVERY_KEY" locator-type="Label"/>
         </field>
         <field name="Correlator" formattingPattern="Route_{0}">
-            <field-locator id="AFileKey" locator="DELIVERY_ROUTE_KEY" locator-type="Label"/>
+            <field-locator id="RouteKey" locator="DELIVERY_ROUTE_KEY" locator-type="Label"/>
         </field>
         <field name="EventName" separator=".">
             <field-locator id="DataFlowId" locator="DELIVERY_DATA_FLOW_ID" locator-type="Label"/>
@@ -387,14 +387,21 @@
 
     <parser name="B2BiCorrelationSetResultSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJDBCResultSetParser">
         <field name="Guid" formattingPattern="Correlation_{0}">
-            <field-locator id="DeliveryKey" locator="CORRELATION_ID" locator-type="Label"/>
+            <field-locator id="CorrelId" locator="CORRELATION_ID" locator-type="Label"/>
         </field>
         <field name="EventType" value="EVENT"/>
         <field name="Correlator" formattingPattern="Correlation_{0}">
-            <field-locator id="DeliveryKey" locator="CORRELATION_ID" locator-type="Label"/>
+            <field-locator id="CorrelId" locator="CORRELATION_ID" locator-type="Label"/>
         </field>
         <field name="Correlator" formattingPattern="CorrelatorsSet_{0}">
             <field-locator id="ObjectId" locator="CORRELATION_OBJECT_ID" locator-type="Label"/>
+        </field>
+        <field name="Correlator" formattingPattern="Workflow_Context_{0}">
+            <field-locator id="WorkflowId" locator="CORRELATION_WF_ID" locator-type="Label">
+                <field-transform name="CorrelationSetWFTransform" lang="groovy">
+                    $fieldValue == null || $fieldValue == -1 ? null : $fieldValue
+                </field-transform>
+            </field-locator>
         </field>
         <field name="EventName" separator=":">
             <field-locator id="Type" locator="CORRELATION_TYPE" locator-type="Label"/>
@@ -425,14 +432,14 @@
 
     <parser name="B2BiWorkflowContextResultSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJDBCResultSetParser">
         <field name="Guid" formattingPattern="Workflow_{0}">
-            <field-locator id="DeliveryKey" locator="WORKFLOW_WFC_ID" locator-type="Label"/>
+            <field-locator id="WorkflowWFCId" locator="WORKFLOW_WFC_ID" locator-type="Label"/>
         </field>
         <field name="EventType" value="EVENT"/>
         <field name="Correlator" formattingPattern="Workflow_{0}">
-            <field-locator id="DeliveryKey" locator="WORKFLOW_WFC_ID" locator-type="Label"/>
+            <field-locator id="WorkflowWFCId" locator="WORKFLOW_WFC_ID" locator-type="Label"/>
         </field>
         <field name="Correlator" formattingPattern="Workflow_Context_{0}">
-            <field-locator id="ObjectId" locator="WORKFLOW_ID" locator-type="Label"/>
+            <field-locator id="WorkflowId" locator="WORKFLOW_ID" locator-type="Label"/>
         </field>
         <field name="EventName" separator=":">
             <field-locator id="ServiceName" locator="WORKFLOW_SERVICE_NAME" locator-type="Label"/>
