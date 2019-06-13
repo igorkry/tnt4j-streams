@@ -412,6 +412,10 @@
         <field name="WorkFlowId" locator="CORRELATION_WF_ID" locator-type="Label" datatype="Number" format="long"/>
         <field name="KeyId" locator="CORRELATION_KEY_ID" locator-type="Label" datatype="Number" format="long"/>
         <field name="ValueUpperCase" locator="CORRELATION_VALUE_UPPER" locator-type="Label"/>
+        <field name="KeyName" locator="CORR_KEY_NAME" locator-type="Label"/>
+        <field name="KeyScope" locator="CORR_KEY_SCOPE" locator-type="Label"/>
+        <field name="KeyType" locator="CORR_KEY_TYPE" locator-type="Label"/>
+        <field name="KeyLabel" locator="CORR_KEY_LABEL" locator-type="Label"/>
 
         <!-- Store latest value to cache -->
         <field name="CS_RecTime" locator="CORRELATION_REC_TIME" locator-type="Label" transparent="true"/>
@@ -764,7 +768,12 @@
                           , CS.REC_TIME AS CORRELATION_REC_TIME
                           , CS.KEY_ID AS CORRELATION_KEY_ID
                           , CS.VALUE_UPPER AS CORRELATION_VALUE_UPPER
+                          , CK.NAME CORR_KEY_NAME
+                          , CK.SCOPE CORR_KEY_SCOPE
+                          , CK.TYPE CORR_KEY_TYPE
+                          , CK.LABEL CORR_KEY_LABEL
                         FROM CORRELATION_SET CS
+                            INNER JOIN CORREL_KEY CK ON (CS.KEY_ID = CK.ID)
                         WHERE CS.REC_TIME > ?
                         ORDER BY CS.REC_TIME, CS.OBJECT_ID ASC
                     ]]>
@@ -813,8 +822,12 @@
                           , WC.EVENT_LEVEL AS WORKFLOW_EVENT_LEVEL
                         FROM WORKFLOW_CONTEXT WC
                         WHERE WC.START_TIME > ?
-                          AND EXISTS (SELECT DL.WORKFLOW_ID FROM DOCUMENT_LIFESPAN DL WHERE DL.WORKFLOW_ID = WC.WORKFLOW_ID)  -- pick only document related workflow events
-                          --AND EXISTS (SELECT AX.SESSION_ID FROM ACT_SESSION AX WHERE AX.START_WFID = WC.WORKFLOW_ID or AX.END_WFID = WC.WORKFLOW_ID) -- optional case of above, picking session bound workflows
+                          AND EXISTS (SELECT DL.WORKFLOW_ID
+                                        FROM WORKFLOW_LINKAGE WL
+                                            INNER JOIN DOCUMENT_LIFESPAN DL ON (WL.C_WF_ID = DL.WORKFLOW_ID)
+                                        WHERE WL.ROOT_WF_ID = WC.WORKFLOW_ID
+                                           OR DL.WORKFLOW_ID = WC.WORKFLOW_ID
+                                     )  -- pick only document related workflow events
                         ORDER BY WC.START_TIME, WC.WORKFLOW_ID ASC
                     ]]>
                     <!-- parameter index is incremented automatically -->
